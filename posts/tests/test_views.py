@@ -1,7 +1,13 @@
-from django.test import TestCase, Client
-from django.contrib.auth import get_user_model
-from django.urls import reverse
+import shutil
+import tempfile
+
 from django import forms
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.core.cache import cache
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import TestCase, Client
+from django.urls import reverse
 
 from posts.models import Group, Post, Comment, Follow
 
@@ -230,7 +236,7 @@ class FollowViewsTests(TestCase):
         cls.user_author = User.objects.create_user(
             username='TestUser_author')
         cls.post = Post.objects.create(author=cls.user_author,
-                                       text='Тестовый текст',)
+                                       text='Тестовый текст', )
 
         cls.authorized_client = Client()
         cls.authorized_client.force_login(cls.user_follower)

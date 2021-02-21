@@ -106,12 +106,12 @@ class PostURLTests(TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_returns_404_status_code_if_url_doesnt_exist(self):
-        url = '/' + get_random_string(10) + '/'
+        url = f'/{get_random_string(10)}/'
         response = self.client.get(url)
         self.assertEquals(response.status_code, 404)
 
     @override_settings(DEBUG=False)
     def test_renders_custom_template_on_404(self):
-        url = '/' + get_random_string(10) + '/'
+        url = f'/{get_random_string(10)}/'
         response = self.client.get(url)
         self.assertTemplateUsed(response, "misc/404.html")
