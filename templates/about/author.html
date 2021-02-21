@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Об авторе проекта{% endblock %}
+{% block content %}
+{% load user_filters %}
+{% load thumbnail %}
+<main role="main" class="container">
+    <div class="row">
+        <!-- Левый вспомогательный блок -->
+        <div class="col-md-3 mb-3 mt-1">
+            <div class="card">
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <div class="h3">
+                                Об авторе
+                            </div>
+                        </li>
+                        <li class="list-group-item">
+                            <div class="h6 text-muted">
+                                <p>Фадеев</p>
+                                <p>Дмитрий Валерьевич</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- Тело страницы -->
+        <div class="col-md-9">
+            {% thumbnail item.image "100x100" crop="center" as im %}
+            <img src="{{ im.url }}" width="{{ im.width }}"
+                 height="{{ im.height }}">
+            {% endthumbnail %}
+            <div class="card-body">
+                <div class="card-text">
+                    <p>Информация "Об авторе"</p>
+                    <p>43 года, родился 3 февраля 1978 года
+                        в Республике Татарстан г.Зеленодольск.</p>
+                    <p>Информационная справка по г.Зеленодольск РТ
+                        :
+                        https://ru.wikipedia.org/wiki/Зеленодольск</p>
+                    <p>Предпочитаемый способ связи:
+                        сот.+7 (9274) 40-00-58 e-mail:
+                        dfadeev.zld@yandex.ru
+                    <p>Хобби: Туризм, Хоккей, Охота, Рыбалка.</p>
+                    <p>Личные качества:</p>
+                    <p>аккуратность, быстрая обучаемость,
+                        высокая работоспособность,
+                        дисциплинированность, вежливость,
+                        не конфликтность, организаторские
+                        способности,
+                        нацеленность на результат.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %} 
