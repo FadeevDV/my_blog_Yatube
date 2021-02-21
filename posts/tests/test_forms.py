@@ -27,7 +27,7 @@ class PostCreateFormTests(TestCase):
         b'\x02\x00\x01\x00\x00\x02\x02\x0C'
         b'\x0A\x00\x3B'
     )
-    cls.uploaded = SimpleUploadedFile(
+    uploaded = SimpleUploadedFile(
         name='small.gif',
         content=small_gif,
         content_type='image/gif'

@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django import forms
 
-from posts.models import Group, Post
+from posts.models import Group, Post, Comment, Follow
 
 User = get_user_model()
 
@@ -179,42 +179,95 @@ class PaginatorViewsTest(TestCase):
         cls.guest_client = Client()
         cls.user = get_user_model().objects.create(username='User')
         for i in range(13):
-            Post.objects.create(author=cls.user, text='Текст' + str(i))
+            Post.objects.create(author=cls.user, text=f'Текст{i}')
 
-    def test_first_page_containse_ten_records(self):
+    def test_first_page_contains_ten_records(self):
         response = self.client.get(reverse('index'))
 
         self.assertEqual(len(response.context.get('page').object_list), 10)
 
-    def test_second_page_containse_three_records(self):
+    def test_second_page_contains_three_records(self):
         response = self.client.get(reverse('index') + '?page=2')
 
         self.assertEqual(len(response.context.get('page').object_list), 3)
 
 
-class CommentViewTest(TestCase):
+class CommentViewsTest(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user = User.objects.create_user(username='TestUser')
+        cls.post = Post.objects.create(author=cls.user, text='Тестовый текст')
+        cls.comment = Comment.objects.create(author=cls.user,
+                                             post=cls.post,
+                                             text='Текст комментария')
 
-    def test_create_comment(self):
-        user = User.objects.create_user(username='test_username')
-        guest_client = Client()
-        authorized_client = Client()
-        self.client.force_login(user)
-        post = Post.objects.create(author=user, text='Some random post text')
-        # comment = Comment.odjects.create()
-        comments = {'comment_1': 'Some random text first',
-                    'comment_2': 'Some random text second',
-                    }
-        url = reverse('posts:add_comment', args=[user.username, post.id])
+        cls.guest_client = Client()
+        cls.authorized_client = Client()
+        cls.authorized_client.force_login(cls.user)
 
-        response_1 = authorized_client.post(url, comments)
-        #response_2 = guest_client.post(url, comments)
+    def test_authorized_client_can_comments_post(self):
+        response = self.authorized_client.get(reverse(
+            'add_comment', args=[self.user.username, self.post.id]))
 
-        self.assertRedirects(response_1, reverse('posts:post',
-                                                 args=[user.username,
-                                                       post.id]))
-        comment_1 = Comment.objects.filter(author=user, post=post,
-                                           text=comments['comment_1']).first()
-        comment_2 = Comment.objects.filter(author=user, post=post,
-                                           text=comments['comment_2']).first()
-        self.assertIsNotNone(comment_1)
-        self.assertIsNone(comment_2)
+        self.assertContains(response, self.comment)
+
+    def test_guest_client_cant_comments_post(self):
+        response = self.guest_client.get(reverse(
+            'add_comment', args=[self.user.username, self.post.id]))
+
+        self.assertRedirects(
+            response, f'/auth/login/?next=/{self.user.username}/'
+                      f'{self.post.id}/comment/')
+
+
+class FollowViewsTests(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user_follower = User.objects.create_user(
+            username='TestUser_follower')
+        cls.user_author = User.objects.create_user(
+            username='TestUser_author')
+        cls.post = Post.objects.create(author=cls.user_author,
+                                       text='Тестовый текст',)
+
+        cls.authorized_client = Client()
+        cls.authorized_client.force_login(cls.user_follower)
+
+    def test_authorized_client_can_follow(self):
+        response = self.authorized_client.get(
+            reverse(
+                'profile_follow', args=[self.user_author.username]))
+
+        self.assertRedirects(response, reverse(
+            'profile', args=[self.user_author.username]))
+        self.assertTrue(Follow.objects.filter(
+            user=self.user_follower).exists())
+
+    def test_authorized_client_can_unfollow(self):
+        self.user_author.following.create(user=self.user_follower)
+        self.user_author.following.filter(user=self.user_follower).delete()
+        response = self.authorized_client.get(
+            reverse('profile_unfollow',
+                    args=[self.user_author.username]))
+
+        self.assertRedirects(response, reverse(
+            'profile', args=[self.user_author.username]))
+        self.assertFalse(Follow.objects.filter(
+            user=self.user_follower).exists())
+
+    def test_post_appears_for_followers(self):
+        self.user_author.following.create(user=self.user_follower)
+        response = self.authorized_client.get(reverse('follow_index'))
+        self.assertContains(response, self.post)
+
+    def test_post_not_appears_for_not_followers(self):
+        user_another_author = User.objects.create_user(
+            username='TestUser_another_author')
+        post_of_another_author = Post.objects.create(
+            author=user_another_author, text='Text of another author')
+
+        response = self.authorized_client.get(reverse('follow_index'))
+
+        self.assertNotContains(response, post_of_another_author)

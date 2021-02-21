@@ -13,6 +13,7 @@ def index(request):
     return render(request, 'index.html', {'page': page,
                                           'paginator': paginator})
 
+
 def group_posts(request, slug):
     group = get_object_or_404(Group, slug=slug)
     post_list = group.posts.all()
@@ -52,7 +53,8 @@ def add_comment(request, username, post_id):
             new_comment.post = post
             new_comment.save()
         return redirect('post', username, post_id)
-    return render(request, 'includes/comments.html', {'form': form, 'post': post})
+    return render(request, 'includes/comments.html',
+                  {'form': form, 'post': post})
 
 
 def profile(request, username):
@@ -127,7 +129,6 @@ def post_view(request, post_id, username):
 @login_required
 def post_edit(request, username: str, post_id: int):
     """This view edits the post by its id and saves changes in database."""
-    # author = get_object_or_404(User, username=username)
     post = get_object_or_404(Post, id=post_id, author__username=username)
     if post.author != request.user:
         return redirect('post', username, post_id)
@@ -140,8 +141,6 @@ def post_edit(request, username: str, post_id: int):
 
 
 def page_not_found(request, exception):
-    # Переменная exception содержит отладочную информацию,
-    # выводить её в шаблон пользователской страницы 404 мы не станем
     return render(
         request,
         "misc/404.html",
@@ -164,7 +163,8 @@ def follow_index(request):
     paginator = Paginator(posts, 10)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
-    return render(request, 'includes/follow.html', {'paginator': paginator, 'page': page})
+    return render(request, 'includes/follow.html',
+                  {'paginator': paginator, 'page': page})
 
 
 @login_required
@@ -183,5 +183,11 @@ def profile_follow(request, username):
 @login_required
 def profile_unfollow(request, username):
     author = get_object_or_404(User, username=username)
-    Follow.objects.filter(user=request.user, author=author).delete()
-    return redirect('profile', username)
+
+    try:
+        subscription = Follow.objects.get(user=request.user, author=author)
+    except Follow.DoesNotExist:
+        return redirect('profile', username=username)
+
+    subscription.delete()
+    return redirect('profile', username=username)
