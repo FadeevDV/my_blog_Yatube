@@ -67,8 +67,8 @@ class PostURLTests(TestCase):
         Неавторизированного пользователя перенаправит на страницу входа"""
         response = self.guest_client.get(f'/{self.user.username}/'
                                          f'{self.post.id}/edit/')
-        self.assertRedirects(response, f"{reverse('login')}?"
-                                       f"next="f'/{self.user.username}/'
+        self.assertRedirects(response, f'/auth/login/?next=/'
+                                       f'{self.user.username}/'
                                        f'{self.post.id}/edit/')
 
     def test_username_post_id_edit_not_author_url_exists_at_desired_location(
