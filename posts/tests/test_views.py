@@ -52,19 +52,19 @@ class PostPagesTests(TestCase):
     def test_pages_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""
         templates_page_names = {
-            'index.html': reverse('index'),
-            'new.html': reverse('new_post'),
-            'group.html': (reverse('group_posts',
-                                   kwargs={'slug': self.group.slug})),
-            'follow.html': reverse('follow_index'),
+            reverse('index'): 'index.html',
+            reverse('new_post'): 'new.html',
+            reverse('group_posts',
+                    kwargs={'slug': self.group.slug}): 'group.html',
+            reverse('follow_index'): 'follow.html',
             'profile.html': reverse('profile',
                                     args=[self.user.username]),
-            'post.html': reverse('post',
-                                 args=[self.user.username, self.post.id]),
-            'new.html': reverse('post_edit',
-                                args=[self.user.username, self.post.id]),
-            'post.html': reverse('add_comment',
-                                 args=[self.user.username, self.post.id]),
+            reverse('post',
+                    args=[self.user.username, self.post.id]): 'post.html',
+            reverse('post_edit',
+                    args=[self.user.username, self.post.id]): 'new.html',
+            reverse('add_comment',
+                    args=[self.user.username, self.post.id]): 'post.html',
         }
         for template, reverse_name in templates_page_names.items():
             with self.subTest(template=template):
