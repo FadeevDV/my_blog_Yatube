@@ -52,7 +52,7 @@ def add_comment(request, username, post_id):
             new_comment.post = post
             new_comment.save()
         return redirect('post', username, post_id)
-    return render(request, 'post.html', {'form': form, 'post': post})
+    return render(request, 'includes/comments.html', {'form': form, 'post': post})
 
 
 def profile(request, username):
@@ -118,7 +118,6 @@ def post_view(request, post_id, username):
             'post': post,
             'author': post.author,
             'post_list': all_posts,
-            'post_count': post_count,
             'comments': comments,
             'form': form,
             'interests': interests,
@@ -165,9 +164,7 @@ def follow_index(request):
     paginator = Paginator(posts, 10)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
-    return render(request,
-                  "follow.html",
-                  {"paginator": paginator, 'page': page})
+    return render(request, 'includes/follow.html', {'paginator': paginator, 'page': page})
 
 
 @login_required
