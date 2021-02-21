@@ -74,7 +74,7 @@ class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE,
                              related_name="comments",
                              verbose_name="Комментарий",
-                             help_text='Напишите комментарий',)
+                             help_text='Напишите комментарий', )
     author = models.ForeignKey(User, on_delete=models.CASCADE,
                                related_name="comments", verbose_name="Автор")
     text = models.TextField("Текст", help_text='Напишите текст')
@@ -94,6 +94,7 @@ class Follow(models.Model):
     author = models.ForeignKey(User,
                                on_delete=models.CASCADE,
                                related_name="following")
+
 
 def get_followed_authors(user):
     user_subscriptions = user.follower.all()
