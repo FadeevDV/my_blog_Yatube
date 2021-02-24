@@ -19,6 +19,7 @@ static/
 posts/static/
 media/
 sent_emails/
+tmp*/
 
 db.sqlite3
 /sent_emails/*.log
