@@ -35,15 +35,12 @@ class PostCreateFormTests(TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        # Метод shutil.rmtree удаляет директорию и всё её содержимое
         shutil.rmtree(settings.MEDIA_ROOT, ignore_errors=True)
         super().tearDownClass()
 
     def setUp(self):
-        # создаем авторизованного клиента
         self.authorized_client = Client()
         self.authorized_client.force_login(PostCreateFormTests.user)
-        # посчитаем текущее количество постов в БД
         self.posts_count = Post.objects.count()
 
     def test_form(self):

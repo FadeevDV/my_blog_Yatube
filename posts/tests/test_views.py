@@ -98,7 +98,8 @@ class PostPagesTests(TestCase):
         response = self.authorized_client.get(reverse('new_post'))
         form_fields = {
             'text': forms.fields.CharField,
-            'group': forms.fields.ChoiceField
+            'group': forms.fields.ChoiceField,
+            'image': forms.fields.ImageField
         }
         for value, expected in form_fields.items():
             with self.subTest(value=value):
@@ -164,7 +165,7 @@ class PostPagesTests(TestCase):
                 self.assertIsInstance(form_field, expected)
 
     def test_posts_on_index_page_cache(self):
-        response_1 = self.guest_client.get(reverse('posts:index'))
+        response_1 = self.guest_client.get(reverse('index'))
         first_post_1 = response_1.context.get('page')[0]
         self.assertContains(response_1, first_post_1.text)
 

@@ -12,6 +12,10 @@
         {% include 'includes/card_author.html' %}
         <div class="col-md-9">
             {% include 'includes/post_item.html' with post=post %}
+
         </div>
 </main>
 {% endblock %}
+{% if show_comment %}
+{% include 'includes/comments.html' %}
+{% endif %}

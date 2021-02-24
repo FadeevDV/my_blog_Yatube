@@ -95,9 +95,12 @@ class Follow(models.Model):
                                on_delete=models.CASCADE,
                                related_name="following")
 
+    def __str__(self):
+        return f's{User:self.user.username}->@{User:self.author.username}'
 
-def get_followed_authors(user):
-    user_subscriptions = user.follower.all()
-    followed_authors = [subscription.author for subscription
-                        in user_subscriptions]
-    return followed_authors
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'author'],
+                                    name='follower')
+        ]
+        ordering = ['-user']

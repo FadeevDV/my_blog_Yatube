@@ -18,5 +18,13 @@ __pycache__/
 static/
 posts/static/
 media/
+sent_emails/
 
 db.sqlite3
+/sent_emails/*.log
+
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
