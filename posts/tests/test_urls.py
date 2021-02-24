@@ -115,5 +115,3 @@ class PostURLTests(TestCase):
         url = f'/{get_random_string(10)}/'
         response = self.client.get(url)
         self.assertTemplateUsed(response, "misc/404.html")
-
-
