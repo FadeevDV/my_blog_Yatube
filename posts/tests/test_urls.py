@@ -120,7 +120,7 @@ class PostURLTests(TestCase):
     def test_username_post_id_followers_guest(self):
         """Страница /follow/ доступна только автору поста.
         Неавторизированного пользователя перенаправит на страницу 302"""
-        response = self.guest_client.get(f'/{follow}/')
+        response = self.guest_client.get('/follow/')
         self.assertEqual(response.status_code, 302)
 
     def test_username_follower_guest(self):
