@@ -3,7 +3,7 @@ from django.core.paginator import Paginator
 from django.shortcuts import redirect, render, get_object_or_404
 
 from .forms import PostForm, CommentForm
-from .models import Post, Group, User, Comment, Follow
+from .models import Post, Group, User, Follow
 
 
 def index(request):
@@ -64,8 +64,8 @@ def profile(request, username):
     page = paginator.get_page(page_number)
     following = False
     if request.user.is_authenticated:
-        followed_authors = User.objects.filter\
-            (following__user=request.user).exists()
+        followed_authors = \
+            User.objects.filter(following__user=request.user).exists()
         following = author in followed_authors
     return render(request, 'profile.html',
                   {'page': page, 'author': author, 'paginator': paginator,

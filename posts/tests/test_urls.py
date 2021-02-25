@@ -115,19 +115,20 @@ class PostURLTests(TestCase):
     def test_renders_custom_template_on_404(self):
         url = f'/{get_random_string(10)}/'
         response = self.client.get(url)
-        self.assertTemplateUsed(response, "misc/404.html")
+        self.assertTemplateUsed(response, 'misc/404.html')
 
     def test_username_post_id_followers_guest(self):
         """Страница /follow/ доступна только автору поста.
         Неавторизированного пользователя перенаправит на страницу 302"""
-        response = self.guest_client.get(f'/follow/')
+        response = self.guest_client.get(f'/{follow}/')
         self.assertEqual(response.status_code, 302)
 
     def test_username_follower_guest(self):
         urls_and_redirects = {reverse('follow_index'): 'follow.html',
                               reverse('add_comment',
                                       args=[self.user.username,
-                                            self.post.id]): 'comments.html',}
+                                            self.post.id]): 'comments.html',
+                              }
         for template, reverse_name in urls_and_redirects.items():
             with self.subTest(template=template):
                 response = self.guest_client.get(reverse_name)
