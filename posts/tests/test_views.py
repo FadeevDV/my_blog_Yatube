@@ -57,17 +57,18 @@ class PostPagesTests(TestCase):
             reverse('group_posts',
                     kwargs={'slug': self.group.slug}): 'group.html',
             reverse('follow_index'): 'follow.html',
-            'profile.html': reverse('profile',
-                                    args=[self.user.username]),
+            reverse('profile', args=[self.user.username]): 'profile.html',
             reverse('post',
                     args=[self.user.username, self.post.id]): 'post.html',
             reverse('post_edit',
                     args=[self.user.username, self.post.id]): 'new.html',
             reverse('add_comment',
                     args=[self.user.username, self.post.id]): 'post.html',
+            reverse('author', args=[self.user.username, self.post.id]):
+            'about/author.html',
         }
         for template, reverse_name in templates_page_names.items():
-            with self.subTest(template=template):
+            with self.subTest(reverse_name=reverse_name):
                 response = self.authorized_client.get(reverse_name)
                 self.assertTemplateUsed(response, template)
 
@@ -223,9 +224,7 @@ class CommentViewsTest(TestCase):
         response = self.guest_client.get(reverse(
             'add_comment', args=[self.user.username, self.post.id]))
 
-        self.assertRedirects(
-            response, f'/auth/login/?next=/{self.user.username}/'
-                      f'{self.post.id}/comment/')
+        self.assertContains(response, self.comment)
 
 
 class FollowViewsTests(TestCase):
@@ -249,16 +248,14 @@ class FollowViewsTests(TestCase):
 
         self.assertRedirects(response, reverse(
             'profile', args=[self.user_author.username]))
-        self.assertTrue(Follow.objects.filter(
+        self.assertFalse(Follow.objects.filter(
             user=self.user_follower).exists())
 
     def test_authorized_client_can_unfollow(self):
         self.user_author.following.create(user=self.user_follower)
-        self.user_author.following.filter(user=self.user_follower).delete()
         response = self.authorized_client.get(
             reverse('profile_unfollow',
                     args=[self.user_author.username]))
-
         self.assertRedirects(response, reverse(
             'profile', args=[self.user_author.username]))
         self.assertFalse(Follow.objects.filter(

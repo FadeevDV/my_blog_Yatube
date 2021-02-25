@@ -45,17 +45,15 @@ def new_post(request):
 
 @login_required
 def add_comment(request, username, post_id):
-    post = get_object_or_404(Post, id=post_id)
+    post = get_object_or_404(Post, id=post_id, author__username=username)
     form = CommentForm(request.POST or None)
-    if request.method == "POST":
-        if form.is_valid():
-            new_comment = form.save(commit=False)
-            new_comment.author = request.user
-            new_comment.post = post
-            new_comment.save()
-        return redirect('post', post.author, post_id)
-    return render(request, 'includes/comments.html',
-                  {'form': form, 'post': post})
+
+    if form.is_valid():
+        new_comment = form.save(commit=False)
+        new_comment.author = request.user
+        new_comment.post = post
+        new_comment.save()
+    return redirect('post', post.author, post_id)
 
 
 def profile(request, username):
@@ -64,11 +62,11 @@ def profile(request, username):
     paginator = Paginator(all_posts, 10)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
+    following = False
     if request.user.is_authenticated:
-        followed_authors = User.objects.filter(following__user=request.user)
+        followed_authors = User.objects.filter\
+            (following__user=request.user).exists()
         following = author in followed_authors
-    else:
-        following = False
     return render(request, 'profile.html',
                   {'page': page, 'author': author, 'paginator': paginator,
                    'following': following})
@@ -77,8 +75,8 @@ def profile(request, username):
 def post_view(request, post_id, username):
     author = get_object_or_404(User, username=username)
     all_posts = author.posts.all().count()
-    post = author.posts.get(id=post_id)
-    comments = Comment.objects.filter(post=post)
+    post = get_object_or_404(Post, author__username=username, id=post_id)
+    comments = post.comments.all()
     form = CommentForm()
     interests = author.follower.all().count()
     followers = author.following.all().count()
@@ -134,10 +132,12 @@ def follow_index(request):
 
 @login_required
 def profile_follow(request, username):
-    author = get_object_or_404(User, username=username)
-    if request.user == author:
+    user = get_object_or_404(User, username=username)
+    if user.following.exists():
         return redirect('profile', username=username)
-    author.following.get_or_create(user=request.user, author=author)
+    if request.user != user:
+        Follow.objects.create(user=request.user,
+                              author=User.objects.get(username=username))
     return redirect('profile', username=username)
 
 
