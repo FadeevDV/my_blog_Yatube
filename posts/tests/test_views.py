@@ -65,7 +65,7 @@ class PostPagesTests(TestCase):
             reverse('add_comment',
                     args=[self.user.username, self.post.id]): 'post.html',
             reverse('author', args=[self.user.username, self.post.id]):
-            'about/author.html',
+                'about/author.html',
         }
         for template, reverse_name in templates_page_names.items():
             with self.subTest(reverse_name=reverse_name):
@@ -221,10 +221,14 @@ class CommentViewsTest(TestCase):
         self.assertContains(response, self.comment)
 
     def test_guest_client_cant_comments_post(self):
-        response = self.guest_client.get(reverse(
-            'add_comment', args=[self.user.username, self.post.id]))
-
-        self.assertContains(response, self.comment)
+        self.guest_client.post(
+            reverse('add_comment', kwargs={'username': self.user,
+                                           'post_id': self.post.id}),
+            data={'text': 'Тестовый текст'}, follow=True)
+        self.guest_client.get(
+            reverse('post', kwargs={'username': self.user,
+                                    'post_id': self.post.id}))
+        self.assertEqual(Comment.objects.count(), self.comment_count)
 
 
 class FollowViewsTests(TestCase):
